@@ -1,0 +1,13 @@
+---
+# Evaluates to 'True' if the *nat table is needed for IPv6 (i.e. redirect,
+# forward or masquerade rules are specified for IPv6), 'False' otherwise.
+iptables_ipv6_nat: "{{ true if (iptables_redirects + iptables_forwards + iptables_masquerades)|rejectattr('ipv4only', 'defined')|list else false }}"
+
+# When the *nat table is not needed for IPv6, then we want to skip loading the
+# *nat section; use '-T filter' argument to load the filter table only.
+iptables_ipv6_cmd_args: "{{ '' if iptables_ipv6_nat|bool else '-T filter' }}"
+
+# Command to validate the IPv4 rules file and IPv6 rules only when enabled.
+iptables_validate_cmd: "file=%s; \
+    iptables-restore -t $file \
+    {% if iptables_ipv6 %}&& ip6tables-restore {{ iptables_ipv6_cmd_args }} -t $file{% endif %}"

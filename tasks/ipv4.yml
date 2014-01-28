@@ -1,0 +1,15 @@
+---
+- name: setup IP forwarding for IPv4
+  sysctl: >
+    name=net.ipv4.ip_forward
+    value={{ iptables_ip_forward }}
+  tags: configuration
+
+- name: configure init script
+  template: >
+    src=conf.d/iptables.j2
+    dest=/etc/conf.d/iptables
+  tags: configuration
+
+- name: start iptables and add to boot runlevel
+  service: name=iptables enabled=true runlevel=boot state=started

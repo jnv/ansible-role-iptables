@@ -1,0 +1,41 @@
+# This file contains Jina2 macros which are imported in template.
+
+% macro join_params()
+%     for (p, v) in varargs |batch(2)
+%         if v is undefined or v is sameas False
+{{            '' -}}
+%         elif v is sameas True
+{{            "%s "|format(p) -}}
+%         else
+{{            "%s %s "|format(p, v) -}}
+%         endif
+%     endfor
+% endmacro
+
+% macro comment(text)
+%     if text is defined
+{{        '# ' ~ text |wordwrap(wrapstring='\n# ') }}
+%     endif
+% endmacro
+
+% macro build_rule(chain, args)
+%     set dport_opt = '-m multiport --dports' if ',' in args.dports|string else '--dport'
+{{    comment(args.comment) -}}
+{{    join_params(
+          '-4',   args.ipv4only is defined and iptables_ipv6,
+          '-6',   args.ipv6only is defined and iptables_ipv6,
+          '-A',   chain,
+          '-i',   args.in_iface,
+          '! -i', args.not_in_iface,
+          '-o',   args.out_iface,
+          '! -o', args.not_out_iface,
+          '-s',   args.source,
+          '! -s', args.not_source,
+          '-d',   args.destination,
+          '! -d', args.not_destination,
+          '-p',   'tcp' if args.proto is undefined and args.not_proto is undefined else args.proto,
+          '! -p', args.not_proto,
+          dport_opt, args.dports|replace(' ', '') if args.dports is defined else False
+          *varargs)
+-}}
+% endmacro

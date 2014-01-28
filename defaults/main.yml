@@ -1,0 +1,84 @@
+---
+# Use IPv6?
+# If set to 'false' then iptables will be installed without IPv6 support and
+# IPv6 will be disabled on all interfaces (via sysctl).
+iptables_ipv6: true
+
+# Enable IP forwarding?
+# This will overwrite sysctl settings for parameters net.ipv4.ip_forward and
+# net.ipv6.conf.all.forwarding.
+iptables_ip_forward: false
+
+# Location of the joined rules file to be loaded with iptables-restore (IPv4)
+# and, when enabled, ip6tables-restore (IPv6).
+iptables_rules_file: /etc/iptables/rules.iptables
+
+# Specify how many new SSH connection from a single host should be permitted
+# per the amount of seconds. The aim of this limit is to prevent brute-force
+# attacks to SSH. The value must be two numbers separated by a slash; for an
+# example, '10/300' means 10 new connections per 300 seconds (5 min).
+iptables_ssh_limit_per_sec: 10/300
+
+# Ignore packets that are going to ports used by SMB/CIFS (aka Windows Sharing)?
+# Non-allowed ports are blocked by default, this just blocks logging of these
+# packets to not mess logs, when you share network with some Windows machines.
+iptables_ignore_smb: true
+
+# Drop all packets that are going to broadcast, multicast or anycast address?
+# This applies only to IPv4.
+iptables_drop_broadcast: true
+
+
+#### FIREWALL RULES
+#
+# The following parameters specifies a partially predefined iptable rules to be generated.
+# Each parameter must be a list of hashes (or an empty list) and accepts these keys:
+#
+# - (not_)proto:       The protocol of the rule or of the packet to check; typically 'tcp' (default),
+#                      or 'udp'. (--protocol)
+#   (not_)in_iface:    Name of an interface via which a packet was received. (--in-interface)
+#   (not_)out_iface:   Name of an interface via which a packet is going to be sent. (--out-interface)
+#   (not_)source:      Source specification - either a network name, a hostname, a network
+#                      (with /mask) or a plain IP address. (--source)
+#   (not_)destination: Destination specification; syntax is the same as for 'source'. (--destination)
+#   dports:            Destination port(s) specification - either a single port, a colon delimited
+#                      range of ports, or a comma separated ports. ((-m multiport) --dport(s))
+#   ipv4only:          Whether to use this rule for IPv4 only; default is unset (false).
+#   ipv6only:          Whether to use this rule for IPv6 only; default is unset (false).
+#   comment:           Comment to add before the rule declaration.
+#
+
+# The input - accept rules.
+# 
+iptables_allowed: []
+
+# The redirect rules
+# 
+# This is useful if you have, for example, local HTTP server listening on the unprivileged port
+# 8080 and wants to accept connections from the port 80, without reconfiguring the HTTP server to
+# listen on this port.
+#
+# Example:
+#   -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 8080
+#
+# Additional parameters:
+# - to_ports:          The local port(s) to redirect to - a single port, or a dash delimited range
+#                      of ports. (--to-ports)
+iptables_redirects: []
+
+# The port forwarding rules (DNAT)
+#
+# Example:
+#   -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.1.2:80
+#
+# Additional parameters:
+# - to_destination:    IP(s) and optionally port(s) to rewrite the destination of the packet to.
+#                      (--to-destination)
+iptables_forwards: []
+
+# The masquerade rules
+#
+# Example:
+#   -A PREROUTING -o eth0 -j MASQUERADE
+#
+iptables_masquerades: []

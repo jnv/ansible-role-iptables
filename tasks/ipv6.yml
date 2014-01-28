@@ -1,0 +1,15 @@
+---
+- name: setup IP forwarding for IPv6
+  sysctl: >
+    name=net.ipv6.conf.all.forwarding
+    value={{ iptables_ip_forward }}
+  tags: configuration
+
+- name: configure init script
+  template: >
+    src=conf.d/ip6tables.j2
+    dest=/etc/conf.d/ip6tables
+  tags: configuration
+
+- name: start ip6tables and add to boot runlevel
+  service: name=ip6tables enabled=true runlevel=boot state=started

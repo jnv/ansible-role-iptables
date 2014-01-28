@@ -1,0 +1,26 @@
+---
+#- name: install iptables
+#  emerge: name=net-firewall/iptables state=present
+#  tags: packages
+
+- name: configure rules
+  template: >
+    src=rules.iptables.j2
+    dest="{{ iptables_rules_file }}"
+    validate="{{ iptables_validate_cmd }}"
+  notify:
+    - reload iptables
+    - reload ip6tables
+  tags: configuration
+
+- name: disable IPv6 on all interfaces
+  sysctl: >
+    name=net.ipv6.conf.all.disable_ipv6
+    value=1
+  when: not iptables_ipv6
+  tags: configuration
+
+- include: ipv4.yml
+
+- include: ipv6.yml
+  when: iptables_ipv6
