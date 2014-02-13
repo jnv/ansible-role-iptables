@@ -11,3 +11,7 @@ iptables_ipv6_cmd_args: "{{ '' if iptables_ipv6_nat|bool else '-T filter' }}"
 iptables_validate_cmd: "file=%s; \
     iptables-restore -t $file \
     {% if iptables_ipv6 %}&& ip6tables-restore {{ iptables_ipv6_cmd_args }} -t $file{% endif %}"
+
+# Name of the service to reload
+iptables_service: iptables
+iptables_servicev6: ip6tables

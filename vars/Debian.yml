@@ -1,0 +1,5 @@
+---
+iptables_rules_file: /etc/iptables/rules
+
+iptables_service: iptables-persistent
+iptables_servicev6: iptables-persistent

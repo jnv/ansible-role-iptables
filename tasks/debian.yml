@@ -1,0 +1,36 @@
+---
+- name: install iptables-persistent for Debian
+  apt: pkg=iptables-persistent state=present
+  tags: package
+
+- name: configure rules
+  template: >
+    src=rules.iptables.j2
+    dest="{{ iptables_rules_file }}"
+  notify: reload iptables
+  tags: configuration
+
+
+- name: symlink IPv4 rules
+  file: >
+    src="{{ iptables_rules_file }}"
+    dest=/etc/iptables/rules.v4
+    state=link
+  notify: reload iptables
+  tags: configuration
+
+# - name: disable IPv6 on all interfaces
+#   sysctl: >
+#     name=net.ipv6.conf.all.disable_ipv6
+#     value=1
+#   when: not iptables_ipv6
+#   tags: configuration
+
+- name: symlink IPv6 rules
+  file: >
+    src="{{ iptables_rules_file }}"
+    dest=/etc/iptables/rules.v6
+    state=link
+  when: iptables_ipv6
+  notify: reload ip6tables
+  tags: configuration
